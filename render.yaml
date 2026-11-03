@@ -1,0 +1,22 @@
+# Blueprint de Render para el frontend (PageMain) como Static Site.
+services:
+  - type: web
+    name: jarstore-frontend
+    runtime: static
+    buildCommand: npm ci && npm run build
+    staticPublishPath: ./dist
+    autoDeploy: true
+    envVars:
+      # URL pública de la API (SIN barra final, SIN /api). Ej: https://jarstore-api.onrender.com
+      # Vite la incrusta en el build, así que debe estar definida ANTES de construir.
+      - key: VITE_API_URL
+        sync: false
+    routes:
+      # SPA: cualquier ruta cae en index.html (React Router hace el resto)
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    headers:
+      - path: /assets/*
+        name: Cache-Control
+        value: public, max-age=31536000, immutable
