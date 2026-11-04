@@ -9,6 +9,7 @@ import Coupons from './Coupons'
 import Pages from './Pages'
 import StoreSettings from './StoreSettings'
 import Users from './Users'
+import MeliHub from './MeliHub'
 
 export default function Admin() {
   usePageMeta({ title: 'Administración', noindex: true })
@@ -24,6 +25,7 @@ export default function Admin() {
         <NavLink to="/admin/banners">Banners</NavLink>
         <NavLink to="/admin/newsletter">Newsletter</NavLink>
         <NavLink to="/admin/cupones">Cupones</NavLink>
+        <NavLink to="/admin/melihub">MeliHub</NavLink>
         <NavLink to="/admin/usuarios">Usuarios</NavLink>
       </nav>
       <Routes>
@@ -37,6 +39,7 @@ export default function Admin() {
         <Route path="newsletter" element={<NewsletterAdmin />} />
         <Route path="usuarios" element={<Users />} />
         <Route path="cupones" element={<Coupons />} />
+        <Route path="melihub" element={<MeliHub />} />
       </Routes>
     </div>
   )
