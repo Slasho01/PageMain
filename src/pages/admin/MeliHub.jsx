@@ -15,6 +15,7 @@ export default function MeliHub() {
     try {
       const r = await post('/admin/melihub/sincronizar', {})
       const partes = [`${r.creados} creado(s)`, `${r.actualizados} actualizado(s)`]
+      if (r.pausados) partes.push(`${r.pausados} pausado(s)`)
       if (r.errores) partes.push(`${r.errores} con error`)
       toast(`Sincronización lista: ${partes.join(', ')} (de ${r.total}).`)
       reload()
