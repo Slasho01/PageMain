@@ -59,7 +59,7 @@ export default function Catalog() {
     per_page: PER_PAGE,
   }
   const ready = kind === 'catalogo' || kind === 'buscar' || ctx.data
-  const productos = useFetch(() => ready ? get('/productos', apiParams) : Promise.resolve(null), [sp.toString(), kind, slug, !!ctx.data, pathname])
+  const productos = useFetch(() => ready ? get('/productos', apiParams) : Promise.resolve(null), [sp.toString(), kind, slug, categoria?.slug, !!marcaPagina, pathname])
   const facetas = useFetch(() => ready ? get('/productos/facetas', { categoria: categoria?.slug, q: q || undefined }) : Promise.resolve(null), [categoria?.slug, q, ready])
 
   const update = (changes, keepPage = false) => {

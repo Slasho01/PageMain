@@ -190,7 +190,6 @@ export default function Home() {
       {banners.loading ? <Skeleton h={360} r={18} /> : hero.length ? <HeroBanners banners={hero} /> : <FeaturedHero />}
       <div style={{ marginTop: 16 }}><Benefits /></div>
       <Rail id="ofertas" title="Ofertas destacadas" eyebrow="Precio rebajado" to="/ofertas" fetcher={() => get('/productos', { oferta: true, orden: 'descuento', per_page: 10 })} />
-      <Categories />
       <Rail id="top" title="Más vendidos" eyebrow="Lo que más se compra" to="/mas-vendidos" fetcher={() => get('/productos/mas-vendidos', { limit: 10 })} />
       <Rail id="nuevos" title="Recién llegados" eyebrow="Novedades" to="/novedades" fetcher={() => get('/productos', { orden: 'recientes', per_page: 10 })} />
       <Brands />

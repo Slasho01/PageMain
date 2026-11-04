@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth'
 import { useCart } from '../cart'
-import { categoryUrl, useCategoryTree } from '../lib/catalog'
 import { shippingFacts, useStore } from '../store'
 import { ROLE_LABEL } from '../utils'
 import Icon from './Icon'
@@ -88,7 +87,6 @@ export default function Header() {
   const { user } = useAuth()
   const { cart } = useCart()
   const { tienda } = useStore()
-  const { tree } = useCategoryTree()
   const [menu, setMenu] = useState(false)
   const location = useLocation()
   useEffect(() => setMenu(false), [location.pathname, location.search])
@@ -123,8 +121,6 @@ export default function Header() {
               <NavLink to="/ofertas" className="deal">Ofertas</NavLink>
               <NavLink to="/novedades">Novedades</NavLink>
               <NavLink to="/mas-vendidos">Más vendidos</NavLink>
-              <span className="catbar-sep" aria-hidden />
-              {tree.roots.slice(0, 7).map((c) => <NavLink key={c.id} to={categoryUrl(c)}>{c.nombre}</NavLink>)}
             </nav>
           </div>
         </div>
