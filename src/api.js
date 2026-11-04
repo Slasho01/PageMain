@@ -1,5 +1,5 @@
 // Cliente HTTP de la API de JarStore.
-const BASE = (import.meta.env.VITE_API_URL || '') + '/api/v2'
+const BASE = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '') + '/api/v2'
 const TOKEN_KEY = 'jarstore_token'
 
 let token = null
