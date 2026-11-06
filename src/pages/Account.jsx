@@ -127,12 +127,17 @@ function Perfil() {
 
 function Password() {
   const toast = useToast()
+  const { logout } = useAuth()
   const blank = { old_password: '', new_password: '', confirm_new_password: '' }
   const [form, setForm] = useState(blank)
   const set = (k) => (e) => setForm({ ...form, [k]: e.target.value })
   const submit = async (e) => {
     e.preventDefault()
     try { await put('/users/me/password', form); toast('Contraseña actualizada'); setForm(blank) } catch (err) { toast.error(err) }
+  }
+  const cerrarTodo = async () => {
+    if (!window.confirm('Esto cerrará tu sesión en TODOS los dispositivos (incluido este). ¿Continuar?')) return
+    try { await post('/users/me/logout-all'); toast('Sesiones cerradas'); logout() } catch (err) { toast.error(err) }
   }
   return (
     <div className="stack">
@@ -143,6 +148,11 @@ function Password() {
         <Field label="Repite la nueva contraseña"><input type="password" autoComplete="new-password" value={form.confirm_new_password} onChange={set('confirm_new_password')} required minLength={8} /></Field>
         <div><button className="btn btn-dark">Cambiar contraseña</button></div>
       </form>
+      <div className="card stack" style={{ maxWidth: 440 }}>
+        <strong>Sesiones</strong>
+        <p className="small muted" style={{ margin: 0 }}>¿Dejaste la sesión abierta en otro dispositivo? Ciérralas todas.</p>
+        <div><button className="btn btn-ghost" onClick={cerrarTodo}>Cerrar sesión en todos los dispositivos</button></div>
+      </div>
       <TwoFactor />
     </div>
   )
