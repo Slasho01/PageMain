@@ -143,6 +143,59 @@ function Password() {
         <Field label="Repite la nueva contraseña"><input type="password" autoComplete="new-password" value={form.confirm_new_password} onChange={set('confirm_new_password')} required minLength={8} /></Field>
         <div><button className="btn btn-dark">Cambiar contraseña</button></div>
       </form>
+      <TwoFactor />
+    </div>
+  )
+}
+
+function TwoFactor() {
+  const toast = useToast()
+  const [enabled, setEnabled] = useState(null)
+  const [tf, setTf] = useState(null)
+  const [code, setCode] = useState('')
+  const load = () => get('/users/me').then((u) => setEnabled(u.twofa_enabled)).catch(() => {})
+  useEffect(() => { load() }, [])
+
+  const setup = async () => { try { setTf(await post('/users/me/2fa/setup')) } catch (e) { toast.error(e) } }
+  const enable = async () => {
+    try { await post('/users/me/2fa/enable', { codigo: code }); setTf(null); setCode(''); toast('2FA activado'); load() } catch (e) { toast.error(e) }
+  }
+  const disable = async () => {
+    const codigo = window.prompt('Ingresa un código de tu app para desactivar el 2FA:')
+    if (codigo == null) return
+    try { await post('/users/me/2fa/disable', { codigo }); toast('2FA desactivado'); load() } catch (e) { toast.error(e) }
+  }
+
+  return (
+    <div className="card stack" style={{ maxWidth: 440 }}>
+      <div className="row between">
+        <strong>Verificación en dos pasos (2FA)</strong>
+        <span className="xs muted">{enabled ? 'Activado' : 'Desactivado'}</span>
+      </div>
+      {enabled ? (
+        <>
+          <p className="small muted" style={{ margin: 0 }}>Al iniciar sesión te pediremos un código de tu app de autenticación.</p>
+          <div><button className="btn btn-ghost" onClick={disable}>Desactivar 2FA</button></div>
+        </>
+      ) : tf ? (
+        <>
+          <p className="small muted" style={{ margin: 0 }}>1) Escanea el QR con Google Authenticator / Authy:</p>
+          {tf.qr && <img src={`data:image/png;base64,${tf.qr}`} alt="Código QR 2FA" width="176" height="176" style={{ borderRadius: 8, background: '#fff', padding: 6 }} />}
+          <details><summary className="xs muted" style={{ cursor: 'pointer' }}>¿No puedes escanear? Usa la clave manual</summary>
+            <code style={{ display: 'block', background: 'var(--surface-2, #f4f4f5)', padding: '8px 10px', borderRadius: 8, wordBreak: 'break-all', marginTop: 6 }}>{tf.secret}</code>
+          </details>
+          <Field label="2) Ingresa el código de 6 dígitos"><input inputMode="numeric" value={code} onChange={(e) => setCode(e.target.value)} placeholder="000000" /></Field>
+          <div className="row" style={{ gap: 8 }}>
+            <button className="btn btn-dark" onClick={enable}>Activar</button>
+            <button className="btn btn-ghost" onClick={() => { setTf(null); setCode('') }}>Cancelar</button>
+          </div>
+        </>
+      ) : (
+        <>
+          <p className="small muted" style={{ margin: 0 }}>Agrega una capa extra de seguridad con una app de autenticación.</p>
+          <div><button className="btn btn-dark" onClick={setup}>Activar 2FA</button></div>
+        </>
+      )}
     </div>
   )
 }

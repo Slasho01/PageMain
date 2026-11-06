@@ -21,8 +21,9 @@ export function AuthProvider({ children }) {
       .finally(() => setLoading(false))
   }, [logout])
 
-  const login = useCallback(async (username, password) => {
-    const res = await post('/auth/login', { username, password })
+  const login = useCallback(async (username, password, codigo) => {
+    const res = await post('/auth/login', { username, password, ...(codigo ? { codigo } : {}) })
+    if (res.twofa_required) return { twofa_required: true }
     setToken(res.token)
     setUser(res.user)
     return res.user

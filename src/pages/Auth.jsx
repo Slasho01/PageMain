@@ -57,12 +57,17 @@ export function Login() {
   const [form, setForm] = useState({ username: '', password: '' })
   const [error, setError] = useState(null)
   const [busy, setBusy] = useState(false)
+  const [need2fa, setNeed2fa] = useState(false)
+  const [codigo, setCodigo] = useState('')
   if (user) return <Navigate to={from} replace />
 
   const submit = async (e) => {
     e.preventDefault(); setBusy(true); setError(null)
-    try { await login(form.username, form.password); navigate(from, { replace: true }) }
-    catch (err) { setError(err.message) } finally { setBusy(false) }
+    try {
+      const r = await login(form.username, form.password, need2fa ? codigo : undefined)
+      if (r?.twofa_required) { setNeed2fa(true); setBusy(false); return }
+      navigate(from, { replace: true })
+    } catch (err) { setError(err.message) } finally { setBusy(false) }
   }
   return (
     <AuthLayout title="Iniciar sesión" subtitle="Bienvenido de vuelta.">
@@ -73,6 +78,9 @@ export function Login() {
           <span className="row between"><span>Contraseña</span><Link className="link xs" to="/recuperar">¿La olvidaste?</Link></span>
           <PasswordInput value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} autoComplete="current-password" />
         </label>
+        {need2fa && (
+          <Field label="Código de verificación (2FA)"><input inputMode="numeric" autoComplete="one-time-code" placeholder="6 dígitos" value={codigo} onChange={(e) => setCodigo(e.target.value)} autoFocus /></Field>
+        )}
         <button className="btn btn-dark btn-lg btn-block" disabled={busy}>{busy ? 'Entrando…' : 'Entrar'}</button>
         <p className="small muted" style={{ textAlign: 'center', margin: 0 }}>¿Primera vez aquí? <Link className="link" to="/registro" state={location.state}>Crea tu cuenta</Link></p>
       </form>
