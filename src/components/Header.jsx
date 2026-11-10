@@ -9,6 +9,7 @@ import MegaMenu from './header/MegaMenu'
 import MobileMenu from './header/MobileMenu'
 import SearchBox from './header/SearchBox'
 import CurrencySwitcher from './header/CurrencySwitcher'
+import ThemeToggle from './ThemeToggle'
 
 function AccountMenu() {
   const { user, logout, isAdmin, isSeller } = useAuth()
@@ -103,6 +104,7 @@ export default function Header() {
             </Link>
             <div className="desktop-only grow"><SearchBox /></div>
             <div className="header-actions">
+              <ThemeToggle />
               <CurrencySwitcher />
               <AccountMenu />
               {user && <Link className="icon-btn desktop-only" to="/cuenta/favoritos" aria-label="Favoritos" title="Favoritos"><Icon name="heart" /></Link>}

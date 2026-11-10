@@ -5,6 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="theme-color" content="#0b0d12" />
+    <!-- Tema (claro/oscuro): se resuelve y aplica ANTES de pintar para evitar parpadeo.
+         'light'/'dark' guardado = elección del usuario; sin guardar = sigue al sistema. -->
+    <script>
+      (function () {
+        try {
+          var saved = localStorage.getItem('theme');
+          var sysDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+          var mode = (saved === 'light' || saved === 'dark') ? saved : (sysDark ? 'dark' : 'light');
+          document.documentElement.dataset.theme = mode;
+          var m = document.querySelector('meta[name="theme-color"]');
+          if (m) m.setAttribute('content', mode === 'dark' ? '#0b0d12' : '#f4f5f7');
+        } catch (e) {}
+      })();
+    </script>
     <!-- Los metadatos de cada página (title, description, canonical, Open Graph, JSON-LD)
          los inserta la API entre estos marcadores (jarstoreapi/src/seo.rs) -->
     <!--seo--><title>JarStore</title>

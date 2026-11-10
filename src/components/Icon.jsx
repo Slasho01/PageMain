@@ -6,6 +6,8 @@ const P = {
   heart: <path d="M12 20.5s-8-4.7-8-10.6A4.6 4.6 0 0 1 12 7a4.6 4.6 0 0 1 8 2.9c0 5.9-8 10.6-8 10.6Z" />,
   menu: <path d="M4 6h16M4 12h16M4 18h16" />,
   x: <path d="M6 6l12 12M18 6 6 18" />,
+  sun: <><circle cx="12" cy="12" r="4" /><path d="M12 2v2.5M12 19.5V22M4.2 4.2l1.8 1.8M18 18l1.8 1.8M2 12h2.5M19.5 12H22M4.2 19.8 6 18M18 6l1.8-1.8" /></>,
+  moon: <path d="M20.5 14.3A8.2 8.2 0 0 1 9.7 3.5 7.5 7.5 0 1 0 20.5 14.3Z" />,
   'chevron-right': <path d="m9 6 6 6-6 6" />,
   'chevron-left': <path d="m15 6-6 6 6 6" />,
   'chevron-down': <path d="m6 9 6 6 6-6" />,
