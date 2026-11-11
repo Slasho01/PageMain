@@ -64,18 +64,21 @@ function TopBar() {
   const { pais, paises, setPais, money, tienda } = useStore()
   const { gratisDesde, metodos } = shippingFacts(pais)
   if (!pais) return null
+  const localCodigo = paises[0]?.codigo // país de origen de la tienda (Chile)
+  const esLocal = pais.codigo === localCodigo
   return (
     <div className="topbar">
       <div className="container">
-        {gratisDesde != null ? <span><Icon name="truck" size={14} style={{ verticalAlign: '-2px' }} /> Envío gratis a {pais.nombre} desde {money(gratisDesde)}</span>
-          : metodos.length > 0 ? <span><Icon name="truck" size={14} style={{ verticalAlign: '-2px' }} /> Despachos a {pais.nombre}</span> : null}
+        {gratisDesde != null
+          ? <span><Icon name="truck" size={14} style={{ verticalAlign: '-2px' }} /> {esLocal ? `Envío gratis desde ${money(gratisDesde)} a todo ${pais.nombre}` : `Envío gratis a ${pais.nombre} desde ${money(gratisDesde)}`}</span>
+          : metodos.length > 0 ? <span><Icon name="truck" size={14} style={{ verticalAlign: '-2px' }} /> Despachos a {esLocal ? `todo ${pais.nombre}` : pais.nombre}</span> : null}
         {tienda.whatsapp && <span className="desktop-only"><Icon name="whatsapp" size={14} style={{ verticalAlign: '-2px' }} /> {tienda.whatsapp}</span>}
         {paises.length > 1 && (
           <label className="row" style={{ '--gap': '6px' }}>
             <Icon name="pin" size={14} />
             <span className="sr-only">País de entrega</span>
             <select value={pais.codigo} onChange={(e) => setPais(e.target.value)} className="topbar-select">
-              {paises.map((p) => <option key={p.codigo} value={p.codigo}>Envíos a {p.nombre}</option>)}
+              {paises.map((p) => <option key={p.codigo} value={p.codigo}>{p.codigo === localCodigo ? p.nombre : `Envío a ${p.nombre}`}</option>)}
             </select>
           </label>
         )}
