@@ -21,9 +21,18 @@ export function AuthProvider({ children }) {
       .finally(() => setLoading(false))
   }, [logout])
 
-  const login = useCallback(async (username, password, codigo) => {
-    const res = await post('/auth/login', { username, password, ...(codigo ? { codigo } : {}) })
-    if (res.twofa_required) return { twofa_required: true }
+  const login = useCallback(async (username, password) => {
+    const res = await post('/auth/login', { username, password })
+    // 2FA: devolvemos el token temporal; la contraseña NO se reenvía en el 2º paso.
+    if (res.twofa_required) return { twofa_required: true, pending: res.pending }
+    setToken(res.token)
+    setUser(res.user)
+    return res.user
+  }, [])
+
+  // Segundo paso del 2FA: token temporal + código, sin usuario/contraseña.
+  const login2fa = useCallback(async (pending, codigo) => {
+    const res = await post('/auth/login/2fa', { pending, codigo })
     setToken(res.token)
     setUser(res.user)
     return res.user
@@ -38,11 +47,12 @@ export function AuthProvider({ children }) {
     user,
     loading,
     login,
+    login2fa,
     logout,
     register,
     isAdmin: user?.role === 'admin',
     isSeller: user?.role === 'seller' || user?.role === 'admin',
-  }), [user, loading, login, logout, register])
+  }), [user, loading, login, login2fa, logout, register])
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

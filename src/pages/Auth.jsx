@@ -50,7 +50,7 @@ function PasswordInput({ value, onChange, autoComplete, minLength }) {
 }
 
 export function Login() {
-  const { login, user } = useAuth()
+  const { login, login2fa, user } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
   const from = location.state?.from || '/'
@@ -59,13 +59,19 @@ export function Login() {
   const [busy, setBusy] = useState(false)
   const [need2fa, setNeed2fa] = useState(false)
   const [codigo, setCodigo] = useState('')
+  const [pending, setPending] = useState('') // token temporal del 2FA (no se reenvía la contraseña)
   if (user) return <Navigate to={from} replace />
 
   const submit = async (e) => {
     e.preventDefault(); setBusy(true); setError(null)
     try {
-      const r = await login(form.username, form.password, need2fa ? codigo : undefined)
-      if (r?.twofa_required) { setNeed2fa(true); setBusy(false); return }
+      if (need2fa) {
+        await login2fa(pending, codigo) // 2º paso: solo token temporal + código
+        navigate(from, { replace: true })
+        return
+      }
+      const r = await login(form.username, form.password)
+      if (r?.twofa_required) { setNeed2fa(true); setPending(r.pending || ''); setBusy(false); return }
       navigate(from, { replace: true })
     } catch (err) { setError(err.message) } finally { setBusy(false) }
   }

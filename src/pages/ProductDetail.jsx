@@ -44,6 +44,18 @@ function DetailSkeleton() {
   )
 }
 
+// Convierte una URL de YouTube (watch?v=, youtu.be/, /embed/) a su URL de embed.
+function ytEmbed(url) {
+  if (!url) return null
+  try {
+    const u = new URL(url)
+    let id = u.searchParams.get('v')
+    if (!id && u.hostname.includes('youtu.be')) id = u.pathname.slice(1)
+    if (!id && u.pathname.includes('/embed/')) id = u.pathname.split('/embed/')[1]
+    return id ? `https://www.youtube.com/embed/${id.replace(/[^\w-]/g, '')}` : null
+  } catch { return null }
+}
+
 function Gallery({ images, nombre }) {
   const [i, setI] = useState(0)
   const [zoom, setZoom] = useState(false)
@@ -130,9 +142,11 @@ function ProductView({ p, reload }) {
   const fav = wish.has(p.id)
 
   const disabled = busy || stock <= 0 || !p.estatus
+  const videoEmbed = ytEmbed(p.video_url)
   const tabs = [
     ['descripcion', 'Descripción', !!p.descripcion],
     ['specs', 'Especificaciones', specs.length > 0],
+    ['video', 'Video', !!videoEmbed],
     ['compat', 'Compatibilidad', !!p.compatibilidad],
     ['resenas', `Reseñas${p.calificacion.total ? ` (${p.calificacion.total})` : ''}`, true],
   ].filter((t) => t[2])
@@ -252,6 +266,13 @@ function ProductView({ p, reload }) {
               <table className="spec-table"><tbody>
                 {specs.map((s) => <tr key={s.nombre}><th scope="row">{s.nombre}</th><td>{s.valor}</td></tr>)}
               </tbody></table>
+            </div>
+          )}
+          {activeTab === 'video' && videoEmbed && (
+            <div className="video-embed">
+              <iframe src={videoEmbed} title={`Video de ${p.nombre}`} loading="lazy"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen referrerPolicy="strict-origin-when-cross-origin" />
             </div>
           )}
           {activeTab === 'compat' && <div className="prose pre-line">{p.compatibilidad}</div>}
