@@ -15,9 +15,10 @@ export default function Categories() {
   const { data, error, loading, reload } = useFetch(() => get('/categorias'), [])
   const [form, setForm] = useState(EMPTY)
   const [editId, setEditId] = useState(null)
+  const [selected, setSelected] = useState(() => new Set())
   const tree = buildTree(data || [])
   const set = (k) => (e) => setForm({ ...form, [k]: e.target.type === 'checkbox' ? e.target.checked : e.target.value })
-  const done = () => { setForm(EMPTY); setEditId(null); reload(); invalidateCategories() }
+  const done = () => { setForm(EMPTY); setEditId(null); setSelected(new Set()); reload(); invalidateCategories() }
 
   const submit = async (e) => {
     e.preventDefault()
@@ -40,6 +41,17 @@ export default function Categories() {
   const rows = []
   const walk = (nodes, depth) => nodes.forEach((c) => { rows.push({ c, depth }); walk(c.children, depth + 1) })
   walk(tree.roots, 0)
+
+  const toggleSel = (id) => setSelected((s) => { const n = new Set(s); n.has(id) ? n.delete(id) : n.add(id); return n })
+  const allIds = rows.map(({ c }) => c.id)
+  const allSelected = allIds.length > 0 && allIds.every((id) => selected.has(id))
+  const toggleAll = () => setSelected(() => (allSelected ? new Set() : new Set(allIds)))
+  const removeMany = async () => {
+    try {
+      const r = await post('/categorias/eliminar-masivo', { ids: [...selected] })
+      toast(`${r.eliminadas} categoría(s) eliminada(s)`); setSelected(new Set()); reload(); invalidateCategories()
+    } catch (err) { toast.error(err) }
+  }
 
   return (
     <div className="stack" style={{ '--gap': '16px' }}>
@@ -70,13 +82,23 @@ export default function Categories() {
       </form>
 
       <ErrorBox error={error} onRetry={reload} />
+      {selected.size > 0 && (
+        <div className="card row between" style={{ padding: '10px 14px' }}>
+          <span className="sm"><strong>{selected.size}</strong> seleccionada(s)</span>
+          <span className="row" style={{ '--gap': '8px' }}>
+            <button type="button" className="btn btn-sm" onClick={() => setSelected(new Set())}>Quitar selección</button>
+            <ConfirmButton confirmText={`¿Eliminar ${selected.size}?`} onConfirm={removeMany}>Eliminar seleccionadas</ConfirmButton>
+          </span>
+        </div>
+      )}
       {loading && !data ? <Spinner /> : rows.length === 0 ? <Empty icon="grid" title="Sin categorías">Crea las principales y luego sus subcategorías.</Empty> : (
         <div className="card table-wrap" style={{ padding: 0 }}>
           <table className="table">
-            <thead><tr><th>Categoría</th><th>URL</th><th className="r">Orden</th><th>Estado</th><th /></tr></thead>
+            <thead><tr><th style={{ width: 34 }}><input type="checkbox" checked={allSelected} onChange={toggleAll} aria-label="Seleccionar todas" /></th><th>Categoría</th><th>URL</th><th className="r">Orden</th><th>Estado</th><th /></tr></thead>
             <tbody>
               {rows.map(({ c, depth }) => (
-                <tr key={c.id}>
+                <tr key={c.id} className={selected.has(c.id) ? 'row-sel' : ''}>
+                  <td><input type="checkbox" checked={selected.has(c.id)} onChange={() => toggleSel(c.id)} aria-label={`Seleccionar ${c.nombre}`} /></td>
                   <td>
                     <span className="row nowrap" style={{ '--gap': '8px', paddingLeft: depth * 22 }}>
                       {depth > 0 && <span className="muted">↳</span>}
